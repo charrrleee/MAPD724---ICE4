@@ -1,8 +1,8 @@
 //
 //  GameViewController.swift
-//  MAPD724 - ICE4
+//  MAPD724 - ICE3
 //
-//  Created by Charlene Cheung on 6/2/2023.
+//  Created by Charlene Cheung on 30/1/2023.
 //
 
 import UIKit
@@ -10,46 +10,105 @@ import SpriteKit
 import GameplayKit
 
 class GameViewController: UIViewController {
-
+    
+    @IBOutlet weak var ScoreLabel: UILabel!
+    @IBOutlet weak var LivesLabel: UILabel!
+    
+    @IBOutlet weak var StartLabel: UILabel!
+    
+    @IBOutlet weak var StartButton: UIButton!
+    
+    @IBOutlet weak var EndLabel: UILabel!
+    
+    @IBOutlet weak var EndButton: UIButton!
+    var currentScene: GKScene?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Load 'GameScene.sks' as a GKScene. This provides gameplay related content
-        // including entities and graphs.
-        if let scene = GKScene(fileNamed: "GameScene") {
-            
-            // Get the SKScene from the loaded GKScene
-            if let sceneNode = scene.rootNode as! GameScene? {
-                
-                // Copy gameplay related content over to the scene
-                sceneNode.entities = scene.entities
-                sceneNode.graphs = scene.graphs
-                
-                // Set the scale mode to scale to fit the window
-                sceneNode.scaleMode = .aspectFill
-                
-                // Present the scene
-                if let view = self.view as! SKView? {
-                    view.presentScene(sceneNode)
-                    
-                    view.ignoresSiblingOrder = true
-                    
-                    view.showsFPS = true
-                    view.showsNodeCount = true
-                }
-            }
-        }
+        presentStartScene()
+        
+        setScene(sceneName: "StartScene")
+        
+        // Initialize the Lives and Score
+        CollisionManager.gameViewController = self
     }
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        if UIDevice.current.userInterfaceIdiom == .phone {
-            return .allButUpsideDown
-        } else {
-            return .all
-        }
+        return .portrait
     }
 
     override var prefersStatusBarHidden: Bool {
         return true
+    }
+    
+    func updateScoreLabel()
+    {
+        ScoreLabel.text = "Score: \(ScoreManager.Score)"
+    }
+    
+    func updateLivesLabel()
+    {
+        LivesLabel.text = "Lives: \(ScoreManager.Lives)"
+    }
+    
+    func setScene(sceneName: String) -> Void
+    {
+        currentScene = GKScene(fileNamed: sceneName)
+        
+        if let scene = currentScene!.rootNode as! SKScene?
+        {
+            scene.scaleMode = .aspectFit
+            if let view = self.view as! SKView?
+            {
+                view.presentScene(scene)
+                view.ignoresSiblingOrder = true
+            }
+        }
+    }
+    func presentStartScene()
+    {
+        ScoreLabel.isHidden = true
+        LivesLabel.isHidden = true
+        StartLabel.isHidden = false
+        StartLabel.isHidden = false
+        EndLabel.isHidden = true
+        EndButton.isHidden = true
+        setScene(sceneName: "StartScene")
+    }
+    
+    func presentEndScene()
+    {
+        EndButton.isHidden = false
+        EndLabel.isHidden = false
+        ScoreLabel.isHidden = true
+        LivesLabel.isHidden = true
+        setScene(sceneName: "EndScene")
+    }
+    
+    @IBAction func startButton_Pressed(_ sender: Any) {
+        StartButton.isHidden = true
+        StartLabel.isHidden = true
+        LivesLabel.isHidden = false
+        ScoreLabel.isHidden = false
+        
+        ScoreManager.Score = 0
+        ScoreManager.Lives = 5
+        updateLivesLabel()
+        updateScoreLabel()
+        setScene(sceneName: "GameScene")
+    }
+    @IBAction func restartButton_Pressed(_ sender: Any) {
+        
+        LivesLabel.isHidden = true
+        ScoreLabel.isHidden = true
+        EndLabel.isHidden = true
+        EndButton.isHidden = true
+        
+        ScoreManager.Score = 0
+        ScoreManager.Lives = 5
+        updateLivesLabel()
+        updateScoreLabel()
+        setScene(sceneName: "GameScene")
     }
 }
